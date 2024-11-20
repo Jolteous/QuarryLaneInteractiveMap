@@ -1,0 +1,327 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #001f3f, #001f3f);
+    color: #f5f7fa;
+    height: 100vh; /* Ensure body takes full height */
+    overflow: hidden; /* Prevent scrolling */
+}
+
+#landing-page {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-start;
+    background: rgba(0, 31, 63, 0.8); /* Semi-transparent background */
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 1000;
+    animation: fadeIn 1s ease-in-out;
+}
+
+#landing-page h1 {
+    font-size: 3em;
+    margin-bottom: 20px;
+    color: #ffcc00;
+}
+
+#landing-page p {
+    font-size: 1.5em;
+    margin-bottom: 40px;
+}
+
+#landing-page button {
+    background: #ffcc00;
+    border: none;
+    color: #001f3f;
+    padding: 15px 30px;
+    font-size: 1em;
+    margin: 5px 0;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+#landing-page button:hover {
+    background: #ffcc33;
+    transform: scale(1.05);
+}
+
+#map {
+    height: 100vh;
+    width: 100vw; /* Ensure map takes full width */
+    position: relative;
+    z-index: 0;
+    animation: fadeIn 1s ease-in-out;
+    color: #333; /* Ensure text is readable */
+}
+
+#drawing-tools {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    background: rgba(0, 31, 63, 0.8); /* Semi-transparent background */
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 1000;
+    animation: fadeIn 1s ease-in-out;
+}
+
+#drawing-tools button {
+    background: #ffcc00;
+    border: none;
+    color: #001f3f;
+    padding: 10px 20px;
+    font-size: 1em;
+    margin: 5px 0;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+#drawing-tools button:hover {
+    background: #ffcc33;
+    transform: scale(1.05);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1001; /* Ensure modal is above the map */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 10px;
+    border: 1px solid #888;
+    width: 95%; /* Increase width to occupy more horizontal space */
+    max-width: none; /* Remove max-width constraint */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    animation: slideIn 0.5s ease-in-out, fadeIn 0.5s ease-in-out;
+    color: #333; /* Ensure text is readable */
+    max-height: 100vh; /* Allow modal to use up to 100% of the viewport height */
+    overflow-y: auto;  /* Enable vertical scroll if content exceeds max-height */
+    height: auto; /* Allow height to adjust based on content */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#waypoint-form {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: white;
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    z-index: 1000;
+    animation: fadeIn 0.5s ease-in-out;
+    color: #333; /* Ensure text is readable */
+}
+
+#waypoint-form input, #waypoint-form button {
+    margin: 10px 0;
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#waypoint-form button {
+    background: #ffcc00;
+    color: #001f3f;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+#waypoint-form button:hover {
+    background: #ffcc33;
+    transform: scale(1.05);
+}
+
+#coordinates {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 5px;
+    font-size: 0.8em;
+    border-radius: 3px;
+    display: block; /* Ensure coordinates display is visible */
+    color: black; /* Set text color to black */
+}
+
+#modal-image {
+    width: 100%;
+    height: 90vh; /* Increase height to occupy more vertical space */
+    display: none;
+    margin-top: 20px; /* Maintain spacing */
+}
+
+.marker {
+    animation: bounce 1s infinite;
+}
+
+.leaflet-control-attribution {
+    display: none;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.waypoint-label span {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    color: #333;
+    white-space: nowrap;
+}
+
+/* <!-- Remove Shortest Path Controls Styling --> */
+/*
+#shortest-path-controls h3 {
+    margin-top: 0;
+    color: #001f3f;
+    text-align: center;
+}
+
+#shortest-path-controls label {
+    display: block;
+    margin-top: 10px;
+    color: #001f3f;
+}
+
+#shortest-path-controls select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+#shortest-path-controls button {
+    margin-top: 15px;
+    background: #ffcc00;
+    color: #001f3f;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+#shortest-path-controls button:hover {
+    background: #ffcc33;
+    transform: scale(1.02);
+}
+
+.shortest-path-controls {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    max-width: 250px;
+}
+*/
+
+/* <!-- Remove Leaflet Draw toolbar styles --> */
+/*
+.leaflet-draw-toolbar {
+    background: rgba(0, 31, 63, 0.9);
+    border-radius: 5px;
+}
+
+.leaflet-draw-toolbar a {
+    background: #ffcc00;
+    color: #001f3f;
+    border-radius: 3px;
+}
+
+.leaflet-draw-toolbar a:hover {
+    background: #ffcc33;
+}
+*/
+
+/* <!-- Remove styles for blocked rectangles and polygons --> */
+/*
+.leaflet-interactive.rectangle-blocked {
+    fill: rgba(255, 0, 0, 0.4); /* Semi-transparent red fill */
+/*  stroke: red;
+    stroke-width: 2;
+}
+
+.leaflet-interactive.polygon-blocked {
+    fill: rgba(255, 0, 0, 0.4); /* Semi-transparent red fill */
+/*  stroke: red;
+    stroke-width: 2;
+}
+*/
+
+/* <!-- Remove drawing-tools class styles if present --> */
+/*
+.drawing-tools {
+    // Styles related to drawing tools
+}
+*/
+
+/* Adjust Leaflet Draw tool styles if necessary */
+
+/* ...existing code... */
