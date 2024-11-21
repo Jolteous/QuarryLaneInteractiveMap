@@ -151,118 +151,107 @@ const walkablePoints = [
 ];
 
 // Build the graph from walkable points
-walkablePoints.forEach((point, index) => {
+walkablePoints.forEach(point => {
     graph[point.text] = graph[point.text] || {};
-
-    // Connect to the next point
-    if (index < walkablePoints.length - 1) {
-        const nextPoint = walkablePoints[index + 1];
-        const distance = L.latLng(point.lat, point.lng).distanceTo(L.latLng(nextPoint.lat, nextPoint.lng));
-        graph[point.text][nextPoint.text] = distance;
-        graph[nextPoint.text] = graph[nextPoint.text] || {};
-        graph[nextPoint.text][point.text] = distance;
-    }
+    walkablePoints.forEach(otherPoint => {
+        if (point !== otherPoint) {
+            const distance = L.latLng(point.lat, point.lng).distanceTo(L.latLng(otherPoint.lat, otherPoint.lng));
+            graph[point.text][otherPoint.text] = distance;
+        }
+    });
 });
 
-// Function to find the shortest path using A* algorithm
-function findShortestPath(start, end) {
-    if (!graph[start] || !graph[end]) {
-        console.error('Start or end waypoint does not exist in the graph.');
-        return [];
-    }
+// Manually drawn paths data
+const manualPaths = [
+    [
+        { "lat": 37.780876162998204, "lng": -122.4120980501175, "text": "Field" },
+        { "lat": 37.78206966240268, "lng": -122.41279542446138, "text": "Point_0_1" },
+        { "lat": 37.782239252228536, "lng": -122.41317093372346, "text": "Point_0_2" },
+        { "lat": 37.78215021761848, "lng": -122.4133747816086, "text": "Point_0_3" },
+        { "lat": 37.78198486734382, "lng": -122.41343379020692, "text": "Point_0_4" },
+        { "lat": 37.78160752815231, "lng": -122.41376101970674, "text": "Point_0_5" },
+        { "lat": 37.78157360992839, "lng": -122.41376101970674, "text": "Foyer" }
+    ],
+    [
+        { "lat": 37.78157360992839, "lng": -122.41376101970674, "text": "Foyer" },
+        { "lat": 37.78160752815231, "lng": -122.41376101970674, "text": "Point_0_5" },
+        { "lat": 37.78198486734382, "lng": -122.41343379020692, "text": "Point_0_4" },
+        { "lat": 37.78215021761848, "lng": -122.4133747816086, "text": "Point_0_3" },
+        { "lat": 37.782239252228536, "lng": -122.41317093372346, "text": "Point_0_2" },
+        { "lat": 37.78206966240268, "lng": -122.41279542446138, "text": "Point_0_1" },
+        { "lat": 37.780876162998204, "lng": -122.4120980501175, "text": "Field" }
+    ],
+    [
+        { "lat": 37.7815630104802, "lng": -122.41376101970674, "text": "Foyer" },
+        { "lat": 37.781611767929206, "lng": -122.41413652896883, "text": "Point_0_1" },
+        { "lat": 37.78161600770584, "lng": -122.41449058055879, "text": "Gym" }
+    ],
+    [
+        { "lat": 37.78161600770584, "lng": -122.41449058055879, "text": "Gym" },
+        { "lat": 37.781611767929206, "lng": -122.41413652896883, "text": "Point_0_1" },
+        { "lat": 37.7815630104802, "lng": -122.41376101970674, "text": "Foyer" }
+    ],
+    // Concatenated path from Field to Gym
+    [
+        { "lat": 37.780876162998204, "lng": -122.4120980501175, "text": "Field" },
+        { "lat": 37.78206966240268, "lng": -122.41279542446138, "text": "Point_0_1" },
+        { "lat": 37.782239252228536, "lng": -122.41317093372346, "text": "Point_0_2" },
+        { "lat": 37.78215021761848, "lng": -122.4133747816086, "text": "Point_0_3" },
+        { "lat": 37.78198486734382, "lng": -122.41343379020692, "text": "Point_0_4" },
+        { "lat": 37.78160752815231, "lng": -122.41376101970674, "text": "Point_0_5" },
+        { "lat": 37.78157360992839, "lng": -122.41376101970674, "text": "Foyer" },
+        { "lat": 37.781611767929206, "lng": -122.41413652896883, "text": "Point_0_1" },
+        { "lat": 37.78161600770584, "lng": -122.41449058055879, "text": "Gym" }
+    ],
+    // Concatenated path from Gym to Field
+    [
+        { "lat": 37.78161600770584, "lng": -122.41449058055879, "text": "Gym" },
+        { "lat": 37.781611767929206, "lng": -122.41413652896883, "text": "Point_0_1" },
+        { "lat": 37.78157360992839, "lng": -122.41376101970674, "text": "Foyer" },
+        { "lat": 37.78160752815231, "lng": -122.41376101970674, "text": "Point_0_5" },
+        { "lat": 37.78198486734382, "lng": -122.41343379020692, "text": "Point_0_4" },
+        { "lat": 37.78215021761848, "lng": -122.4133747816086, "text": "Point_0_3" },
+        { "lat": 37.782239252228536, "lng": -122.41317093372346, "text": "Point_0_2" },
+        { "lat": 37.78206966240268, "lng": -122.41279542446138, "text": "Point_0_1" },
+        { "lat": 37.780876162998204, "lng": -122.4120980501175, "text": "Field" }
+    ],
+    // Path from Engineering Building to Villa
+    [
+        { "lat": 37.77956710729966, "lng": -122.41594702005388, "text": "Engineering Building" },
+        { "lat": 37.77964130540841, "lng": -122.41619512438777, "text": "Point_0_1" },
+        { "lat": 37.77898305958608, "lng": -122.41626754403116, "text": "Point_0_2" },
+        { "lat": 37.77901697899874, "lng": -122.4164378643036, "text": "Point_0_3" },
+        { "lat": 37.77951198865635, "lng": -122.41646602749826, "text": "Point_0_4" },
+        { "lat": 37.779718683356776, "lng": -122.41663768887521, "text": "Villa" }
+    ],
+    // Path from Villa to Engineering Building
+    [
+        { "lat": 37.779718683356776, "lng": -122.41663768887521, "text": "Villa" },
+        { "lat": 37.77951198865635, "lng": -122.41646602749826, "text": "Point_0_4" },
+        { "lat": 37.77901697899874, "lng": -122.4164378643036, "text": "Point_0_3" },
+        { "lat": 37.77898305958608, "lng": -122.41626754403116, "text": "Point_0_2" },
+        { "lat": 37.77964130540841, "lng": -122.41619512438777, "text": "Point_0_1" },
+        { "lat": 37.77956710729966, "lng": -122.41594702005388, "text": "Engineering Building" }
+    ]
+];
 
-    const openSet = new Set([start]);
-    const cameFrom = {};
-    const gScore = {};
-    const fScore = {};
-
-    Object.keys(graph).forEach(node => {
-        gScore[node] = Infinity;
-        fScore[node] = Infinity;
-    });
-
-    gScore[start] = 0;
-    fScore[start] = heuristic(start, end);
-
-    while (openSet.size > 0) {
-        const current = Array.from(openSet).reduce((min, node) => (fScore[node] < fScore[min] ? node : min), Array.from(openSet)[0]);
-
-        if (current === end) {
-            return reconstructPath(cameFrom, current);
-        }
-
-        openSet.delete(current);
-
-        Object.keys(graph[current]).forEach(neighbor => {
-            const tentativeGScore = gScore[current] + graph[current][neighbor];
-            if (tentativeGScore < gScore[neighbor]) {
-                cameFrom[neighbor] = current;
-                gScore[neighbor] = tentativeGScore;
-                fScore[neighbor] = gScore[neighbor] + heuristic(neighbor, end);
-                if (!openSet.has(neighbor)) {
-                    openSet.add(neighbor);
-                }
+// Function to find the path in manually drawn paths
+function findManualPath(start, end) {
+    for (const path of manualPaths) {
+        const startIndex = path.findIndex(point => point.text === start);
+        const endIndex = path.findIndex(point => point.text === end);
+        if (startIndex !== -1 && endIndex !== -1) {
+            if (startIndex < endIndex) {
+                return path.slice(startIndex, endIndex + 1);
+            } else {
+                return path.slice(endIndex, startIndex + 1).reverse();
             }
-        });
-    }
-
-    // If no path found, attempt to connect through walkable points
-    console.warn('No direct path found. Attempting to connect via walkable points.');
-    const startNearest = findNearestWalkablePoint(waypoints.find(wp => wp.text === start));
-    const endNearest = findNearestWalkablePoint(waypoints.find(wp => wp.text === end));
-
-    if (startNearest && endNearest) {
-        const pathToWalkable = findShortestPath(start, startNearest);
-        const walkablePath = findShortestPath(startNearest, endNearest);
-        const pathFromWalkable = findShortestPath(endNearest, end);
-
-        if (pathToWalkable.length > 0 && walkablePath.length > 0 && pathFromWalkable.length > 0) {
-            return [...pathToWalkable, ...walkablePath.slice(1), ...pathFromWalkable.slice(1)];
         }
     }
-
-    console.error('Unable to find a path through walkable points.');
     return [];
 }
 
-function heuristic(a, b) {
-    const waypointA = waypoints.find(wp => wp.text === a) || walkablePoints.find(wp => wp.text === a);
-    const waypointB = waypoints.find(wp => wp.text === b) || walkablePoints.find(wp => wp.text === b);
-    return L.latLng(waypointA.lat, waypointA.lng).distanceTo(L.latLng(waypointB.lat, waypointB.lng));
-}
-
-function reconstructPath(cameFrom, current) {
-    const totalPath = [current];
-    while (current in cameFrom) {
-        current = cameFrom[current];
-        totalPath.unshift(current);
-    }
-    return totalPath;
-}
-
-// Remove or update the drawRoute function to eliminate undefined walkingPaths
-function drawRoute(route) {
-    // Remove the function if not used
-    // Alternatively, update to use existing route data
-    // For now, removing to prevent errors
-}
-
-// Add a layer group to manage drawn paths
-const pathLayer = L.layerGroup().addTo(map);
-
-// Function to display the shortest path in red
-function displayShortestPath(route) {
-    console.log('Displaying shortest path:', route); // Log the route
-    pathLayer.clearLayers(); // Clear existing paths
-    const latLngs = route.map(point => {
-        const wp = waypoints.find(wp => wp.text === point) || walkablePoints.find(wp => wp.text === point);
-        return [wp.lat, wp.lng];
-    });
-    L.polyline(latLngs, { color: 'red', weight: 4, opacity: 0.9 }).addTo(pathLayer);
-    console.log('Path drawn on the map in red.'); // Confirm drawing
-}
-
-// Function to compute and display the shortest path
+// Function to compute and display the path using manually drawn paths
 function computeAndDisplayPath() {
     const start = document.getElementById('start-waypoint').value;
     const end = document.getElementById('end-waypoint').value;
@@ -281,7 +270,7 @@ function computeAndDisplayPath() {
         return;
     }
 
-    let route = findShortestPath(start, end);
+    let route = findManualPath(start, end);
     console.log('Final route:', route); // Log final route
     if (route.length === 0) {
         alert('No path found between the selected waypoints.');
@@ -290,6 +279,18 @@ function computeAndDisplayPath() {
 
     displayShortestPath(route);
 }
+
+// Function to display the path in red
+function displayShortestPath(route) {
+    console.log('Displaying path:', route); // Log the route
+    pathLayer.clearLayers(); // Clear existing paths
+    const latLngs = route.map(point => [point.lat, point.lng]);
+    L.polyline(latLngs, { color: 'red', weight: 4, opacity: 0.9 }).addTo(pathLayer);
+    console.log('Path drawn on the map in red.'); // Confirm drawing
+}
+
+// Add a layer group to manage drawn paths
+const pathLayer = L.layerGroup().addTo(map);
 
 // Add click event to display latitude and longitude
 map.on('click', function(e) {
@@ -312,79 +313,79 @@ function explore(location) {
     }
 }
 
-// Example usage of findShortestPath and drawRoute functions
-// const route = findShortestPath('Engineering Building', 'Villa');
-// drawRoute(route);
+// Ensure the DOM is fully loaded before accessing elements
+document.addEventListener('DOMContentLoaded', () => {
+    // Populate the start and end waypoint dropdowns
+    const startSelect = document.getElementById('start-waypoint');
+    const endSelect = document.getElementById('end-waypoint');
 
-// <!-- Remove drawing tool functions -->
-// let drawing = false;
-// let currentPath = [];
-// const drawnPaths = [];
+    waypoints.forEach(waypoint => {
+        const option = document.createElement('option');
+        option.value = waypoint.text;
+        option.text = waypoint.text;
+        startSelect.appendChild(option.cloneNode(true));
+        endSelect.appendChild(option);
+    });
+
+    // Allow user to input start and end locations
+    // Add event listener to compute and display the path when user submits selection
+    document.getElementById('compute-path-button').addEventListener('click', computeAndDisplayPath);
+});
+
+// Reintroduce drawing tool functionality
+let drawing = false;
+let currentPath = [];
+const drawnPaths = [];
 
 // Function to start drawing a path
-// function startDrawing() {
-//     drawing = true;
-//     currentPath = [];
-//     map.on('click', addPointToPath);
-// }
-
-// Function to stop drawing a path
-// function stopDrawing() {
-//     drawing = false;
-//     map.off('click', addPointToPath);
-//     if (currentPath.length > 1) {
-//         drawnPaths.push(currentPath);
-//         L.polyline(currentPath, { color: 'red', weight: 4, opacity: 0.7 }).addTo(map);
-//     }
-// }
-
-// Function to add a point to the current path
-// function addPointToPath(e) {
-//     const { lat, lng } = e.latlng;
-//     const newPoint = { lat, lng, text: `Point_${drawnPaths.length}_${currentPath.length}` };
-//     currentPath.push(newPoint);
-//     L.marker([lat, lng]).addTo(map).bindPopup(newPoint.text);
-    
-//     // Connect the new point with the previous point
-//     if (currentPath.length > 1) {
-//         const from = currentPath[currentPath.length - 2].text;
-//         const to = newPoint.text;
-//         addEdge(from, to);
-//         L.polyline([[currentPath[currentPath.length - 2].lat, currentPath[currentPath.length - 2].lng], [lat, lng]], { color: 'red', weight: 2, opacity: 0.7 }).addTo(map);
-//     }
-// }
-
-// Function to save the drawn paths
-// function savePaths() {
-//     console.log(JSON.stringify(drawnPaths));
-//     // You can send the drawnPaths to your server or save them in local storage
-// }
-
-// <!-- Remove drawing tools control -->
-// // Add drawing tools to the map
-// const drawingTools = L.control({ position: 'bottomleft' });
-// drawingTools.onAdd = function() {
-//     const div = L.DomUtil.create('div', 'drawing-tools');
-//     div.innerHTML = `
-//         <button onclick="startDrawing()">Start Drawing</button>
-//         <button onclick="stopDrawing()">Stop Drawing</button>
-//         <button onclick="savePaths()">Save Paths</button>
-//     `;
-//     return div;
-// };
-// drawingTools.addTo(map);
-
-// <!-- Remove any references to drawing utilities in existing code -->
-
-// Ensure graph includes connections between waypoints and nearest walkable points
-function connectWaypointsToWalkablePoints() {
-    waypoints.forEach(waypoint => {
-        const nearestWalkable = findNearestWalkablePoint(waypoint);
-        if (nearestWalkable) {
-            addEdge(waypoint.text, nearestWalkable);
-        }
-    });
+function startDrawing() {
+    drawing = true;
+    currentPath = [];
+    map.on('click', addPointToPath);
 }
 
-// Call the function to connect waypoints to walkable points during initialization
-connectWaypointsToWalkablePoints();
+// Function to stop drawing a path
+function stopDrawing() {
+    drawing = false;
+    map.off('click', addPointToPath);
+    if (currentPath.length > 1) {
+        drawnPaths.push(currentPath);
+        L.polyline(currentPath, { color: 'red', weight: 4, opacity: 0.7 }).addTo(map);
+    }
+}
+
+// Function to add a point to the current path
+function addPointToPath(e) {
+    const { lat, lng } = e.latlng;
+    const newPoint = { lat, lng, text: `Point_${drawnPaths.length}_${currentPath.length}` };
+    currentPath.push(newPoint);
+    L.marker([lat, lng]).addTo(map).bindPopup(newPoint.text);
+    
+    // Connect the new point with the previous point
+    if (currentPath.length > 1) {
+        const from = currentPath[currentPath.length - 2].text;
+        const to = newPoint.text;
+        addEdge(from, to);
+        L.polyline([[currentPath[currentPath.length - 2].lat, currentPath[currentPath.length - 2].lng], [lat, lng]], { color: 'red', weight: 2, opacity: 0.7 }).addTo(map);
+    }
+}
+
+// Function to save the drawn paths
+function savePaths() {
+    const paths = drawnPaths.map(path => path.map(point => ({ lat: point.lat, lng: point.lng, text: point.text })));
+    console.log(JSON.stringify(paths, null, 2)); // Log the paths in a readable format
+    // You can send the paths to your server or save them in local storage
+}
+
+// Add drawing tools to the map
+const drawingTools = L.control({ position: 'bottomleft' });
+drawingTools.onAdd = function() {
+    const div = L.DomUtil.create('div', 'drawing-tools');
+    div.innerHTML = `
+        <button onclick="startDrawing()">Start Drawing</button>
+        <button onclick="stopDrawing()">Stop Drawing</button>
+        <button onclick="savePaths()">Save Paths</button>
+    `;
+    return div;
+};
+drawingTools.addTo(map);
