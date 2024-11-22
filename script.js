@@ -45,7 +45,16 @@ waypoints.forEach(waypoint => {
         html: `<span>${waypoint.text}</span>`,
         iconSize: [100, 40]
     });
-    L.marker([waypoint.lat, waypoint.lng], { icon: label }).addTo(map);
+    const labelMarker = L.marker([waypoint.lat, waypoint.lng], { icon: label }).addTo(map);
+
+    // Add hover effect to enlarge the marker
+    labelMarker.on('mouseover', () => {
+        labelMarker.getElement().querySelector('span').classList.add('hover');
+    });
+
+    labelMarker.on('mouseout', () => {
+        labelMarker.getElement().querySelector('span').classList.remove('hover');
+    });
 });
 
 // Initialize the graph
@@ -452,6 +461,45 @@ const manualPaths = [
         { "lat": 37.782536033487496, "lng": -122.41568952798846, "text": "Point_0_15" },
         { "lat": 37.782575250921845, "lng": -122.41549842059614, "text": "Point_0_16" },
         { "lat": 37.78252, "lng": -122.41565, "text": "Lower School" }
+    ],
+    // Path from Lower School to Engineering Building
+    [
+        { "lat": 37.78252, "lng": -122.41565, "text": "Lower School" },
+        { "lat": 37.782536033487496, "lng": -122.41559833288196, "text": "Point_0_0" },
+        { "lat": 37.78156513036994, "lng": -122.41567611694337, "text": "Point_0_1" },
+        { "lat": 37.78153545190782, "lng": -122.41538107395174, "text": "Point_0_2" },
+        { "lat": 37.78136586046713, "lng": -122.41503775119781, "text": "Point_0_3" },
+        { "lat": 37.78132346254616, "lng": -122.4146354198456, "text": "Point_0_4" },
+        { "lat": 37.78074684840649, "lng": -122.41467833518983, "text": "Point_0_5" },
+        { "lat": 37.780577255156416, "lng": -122.4146890640259, "text": "Point_0_6" },
+        { "lat": 37.78039494197862, "lng": -122.41484463214876, "text": "Point_0_7" },
+        { "lat": 37.78037374274271, "lng": -122.41531133651735, "text": "Point_0_8" },
+        { "lat": 37.77983104023349, "lng": -122.41532206535341, "text": "Point_0_9" },
+        { "lat": 37.779843759869124, "lng": -122.41595506668092, "text": "Point_0_10" },
+        { "lat": 37.77962752576527, "lng": -122.41603016853334, "text": "Point_0_11" },
+        { "lat": 37.77956, "lng": -122.41596, "text": "Engineering Building" },
+    ],
+    // Concatenated path from Lower School to Engineering Building to Villa
+    [
+        { "lat": 37.78252, "lng": -122.41565, "text": "Lower School" },
+        { "lat": 37.782536033487496, "lng": -122.41559833288196, "text": "Point_0_0" },
+        { "lat": 37.78156513036994, "lng": -122.41567611694337, "text": "Point_0_1" },
+        { "lat": 37.78153545190782, "lng": -122.41538107395174, "text": "Point_0_2" },
+        { "lat": 37.78136586046713, "lng": -122.41503775119781, "text": "Point_0_3" },
+        { "lat": 37.78132346254616, "lng": -122.4146354198456, "text": "Point_0_4" },
+        { "lat": 37.78074684840649, "lng": -122.41467833518983, "text": "Point_0_5" },
+        { "lat": 37.780577255156416, "lng": -122.4146890640259, "text": "Point_0_6" },
+        { "lat": 37.78039494197862, "lng": -122.41484463214876, "text": "Point_0_7" },
+        { "lat": 37.78037374274271, "lng": -122.41531133651735, "text": "Point_0_8" },
+        { "lat": 37.77983104023349, "lng": -122.41532206535341, "text": "Point_0_9" },
+        { "lat": 37.779843759869124, "lng": -122.41595506668092, "text": "Point_0_10" },
+        { "lat": 37.77962752576527, "lng": -122.41603016853334, "text": "Point_0_11" },
+        { "lat": 37.77956, "lng": -122.41596, "text": "Engineering Building" },
+        { "lat": 37.77964130540841, "lng": -122.41619512438777, "text": "Point_0_1" },
+        { "lat": 37.77898305958608, "lng": -122.41626754403116, "text": "Point_0_2" },
+        { "lat": 37.77901697899874, "lng": -122.4164378643036, "text": "Point_0_3" },
+        { "lat": 37.77951198865635, "lng": -122.41646602749826, "text": "Point_0_4" },
+        { "lat": 37.779718683356776, "lng": -122.41663768887521, "text": "Villa" }
     ]
 ];
 
@@ -609,3 +657,10 @@ drawingTools.onAdd = function() {
     return div;
 };
 drawingTools.addTo(map);
+
+let currentRotation = 0;
+
+function rotateView() {
+    currentRotation = (currentRotation + 90) % 360;
+    document.getElementById('map').style.transform = `rotate(${currentRotation}deg)`;
+}
